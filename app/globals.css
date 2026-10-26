@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light Mode Base */
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 222 84% 60%;
+    --radius: 0.75rem;
+
+    /* Section Accent Tokens (Light Mode) */
+    --daily-primary: 160 84% 39%;
+    --daily-secondary: 173 80% 40%;
+    --daily-accent: 38 92% 50%;
+    --daily-surface: 152 76% 96%;
+    --daily-border: 156 72% 86%;
+
+    --study-primary: 239 84% 67%;
+    --study-secondary: 263 70% 50%;
+    --study-accent: 189 94% 43%;
+    --study-surface: 240 100% 98%;
+    --study-border: 234 89% 89%;
+
+    --fun-primary: 350 89% 60%;
+    --fun-secondary: 292 84% 61%;
+    --fun-accent: 15 95% 57%;
+    --fun-surface: 355 100% 97%;
+    --fun-border: 354 100% 88%;
+  }
+
+  .dark {
+    /* Dark Mode Base */
+    --background: 224 71% 4%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+    --border: 217 33% 20%;
+    --input: 217 33% 20%;
+    --ring: 224 76% 48%;
+
+    /* Section Accent Tokens (Dark Mode) */
+    --daily-primary: 158 64% 52%;
+    --daily-secondary: 172 66% 50%;
+    --daily-accent: 43 96% 56%;
+    --daily-surface: 164 86% 7%;
+    --daily-border: 161 74% 20%;
+
+    --study-primary: 239 84% 67%;
+    --study-secondary: 263 70% 65%;
+    --study-accent: 187 92% 55%;
+    --study-surface: 244 58% 10%;
+    --study-border: 243 47% 24%;
+
+    --fun-primary: 351 95% 71%;
+    --fun-secondary: 292 91% 73%;
+    --fun-accent: 21 90% 63%;
+    --fun-surface: 354 70% 10%;
+    --fun-border: 353 59% 25%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased min-h-screen selection:bg-indigo-500/30;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+/* Custom glassmorphism cards */
+.glass-card {
+  @apply bg-card/85 backdrop-blur-md border border-border rounded-xl transition-all duration-200;
+}
+
+.glass-card-daily {
+  @apply bg-daily-surface/50 border-daily-border/50 text-foreground rounded-xl transition-all duration-200;
+}
+
+.glass-card-study {
+  @apply bg-study-surface/50 border-study-border/50 text-foreground rounded-xl transition-all duration-200;
+}
+
+.glass-card-fun {
+  @apply bg-fun-surface/50 border-fun-border/50 text-foreground rounded-xl transition-all duration-200;
+}
+
+/* Safe area support for mobile devices */
+.pb-safe {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+.pt-safe {
+  padding-top: max(1rem, env(safe-area-inset-top));
+}
+
+/* Custom delicate scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/20 rounded-full hover:bg-muted-foreground/40 transition-colors;
+}

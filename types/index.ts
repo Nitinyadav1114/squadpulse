@@ -29,6 +29,14 @@ export interface Persona {
 // System & Shell State
 // ----------------------------------------------------------------------------
 
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  image?: string;
+  provider: 'google' | 'demo' | 'guest';
+}
+
 export type ActiveSection = 'hub' | 'daily' | 'study' | 'fun';
 export type ThemeMode = 'dark' | 'light';
 
@@ -38,6 +46,7 @@ export interface SystemState {
   activeSection: ActiveSection;
   isSidebarCollapsed: boolean;
   isPingDrawerOpen: boolean;
+  authUser?: AuthUser | null;
 }
 
 // ----------------------------------------------------------------------------

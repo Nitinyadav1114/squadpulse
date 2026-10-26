@@ -106,6 +106,13 @@ export function Navigation() {
         { name: 'Meme Vault', href: '/fun#memes', icon: Laugh },
       ],
     },
+    {
+      title: 'Explore',
+      accentColor: 'text-amber-500',
+      items: [
+        { name: 'Product Tour', href: '/landing', icon: Sparkles },
+      ],
+    },
   ];
 
   return (

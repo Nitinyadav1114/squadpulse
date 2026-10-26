@@ -27,6 +27,7 @@ import {
   MediaStatus,
   HabitChallenge,
   MemeItem,
+  AuthUser,
 } from '@/types';
 import {
   SEED_PERSONAS,
@@ -56,6 +57,7 @@ export interface SquadPulseState {
   activeSection: ActiveSection;
   isSidebarCollapsed: boolean;
   isPingDrawerOpen: boolean;
+  authUser: AuthUser | null;
 
   // Personas
   personas: Record<PersonaId, Persona>;
@@ -91,6 +93,8 @@ export interface SquadPulseState {
   togglePingDrawer: () => void;
   setPingDrawerOpen: (open: boolean) => void;
   resetToSeedData: () => void;
+  setAuthUser: (user: AuthUser | null) => void;
+  logoutUser: () => void;
 
   // Daily Life Actions
   updateStatus: (badge: StatusBadge, customMessage: string, durationMinutes: number) => void;
@@ -144,6 +148,7 @@ export const useSquadStore = create<SquadPulseState>()(
       activeSection: 'hub',
       isSidebarCollapsed: false,
       isPingDrawerOpen: false,
+      authUser: null,
 
       // Initial Data from Seeds
       personas: SEED_PERSONAS,
@@ -172,6 +177,8 @@ export const useSquadStore = create<SquadPulseState>()(
       setSidebarCollapsed: (collapsed) => set({ isSidebarCollapsed: collapsed }),
       togglePingDrawer: () => set((state) => ({ isPingDrawerOpen: !state.isPingDrawerOpen })),
       setPingDrawerOpen: (open) => set({ isPingDrawerOpen: open }),
+      setAuthUser: (authUser) => set({ authUser }),
+      logoutUser: () => set({ authUser: null }),
 
       resetToSeedData: () =>
         set({

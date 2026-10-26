@@ -30,9 +30,11 @@ import {
   Check,
 } from 'lucide-react';
 import { PersonaId } from '@/types';
+import { LandingPage } from '@/components/landing/LandingPage';
 
 export default function SquadHubPage() {
   const {
+    authUser,
     currentPersonaId,
     personas,
     statuses,
@@ -103,8 +105,38 @@ export default function SquadHubPage() {
     ? personas[selectedDebtToSettle.creditorId]
     : null;
 
+  if (!authUser) {
+    return <LandingPage />;
+  }
+
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
+      {/* ------------------------------------------------------------- */}
+      {/* 0. AUTHENTICATED USER SESSION STATUS BAR                      */}
+      {/* ------------------------------------------------------------- */}
+      <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 rounded-2xl bg-muted/40 border border-border">
+        <div className="flex items-center gap-2.5">
+          <Avatar name={authUser.name} src={authUser.image} size="sm" />
+          <div className="text-xs">
+            <span className="font-semibold text-foreground">{authUser.name}</span>
+            <span className="text-muted-foreground ml-1.5 hidden sm:inline">({authUser.email})</span>
+            <span className="ml-2 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              {authUser.provider === 'google' ? 'Google OAuth' : 'Guest Demo'}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Link
+            href="/landing"
+            className="text-xs text-muted-foreground hover:text-foreground px-2.5 py-1 rounded-xl hover:bg-muted border border-border transition-colors flex items-center gap-1"
+          >
+            <Sparkles className="w-3 h-3 text-amber-400" />
+            <span>Product Tour</span>
+          </Link>
+        </div>
+      </div>
+
       {/* ------------------------------------------------------------- */}
       {/* 1. WELCOME HERO & MULTI-PERSONA PERSPECTIVE BANNER             */}
       {/* ------------------------------------------------------------- */}

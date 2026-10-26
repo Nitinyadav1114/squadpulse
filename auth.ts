@@ -1,9 +1,8 @@
 import NextAuth from 'next-auth';
 import Google from 'next-auth/providers/google';
-import Credentials from 'next-auth/providers/credentials';
 
-const googleClientId = process.env.GOOGLE_CLIENT_ID;
-const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+const googleClientId = process.env.GOOGLE_CLIENT_ID || process.env.AUTH_GOOGLE_ID;
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET || process.env.AUTH_GOOGLE_SECRET;
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -14,45 +13,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             clientSecret: googleClientSecret,
           }),
         ]
-      : []),
-    Credentials({
-      id: 'demo-login',
-      name: 'Open Source Demo / Guest',
-      credentials: {
-        personaId: { label: 'Persona ID', type: 'text' },
-        name: { label: 'Full Name', type: 'text' },
-        email: { label: 'Email Address', type: 'email' },
-        role: { label: 'Campus Role', type: 'text' },
-        avatar: { label: 'Avatar URL', type: 'text' },
-      },
-      async authorize(credentials) {
-        if (!credentials) return null;
-        const personaId = (credentials.personaId as string) || 'aman';
-        const name = (credentials.name as string) || 'Aman Sharma';
-        const email = (credentials.email as string) || `${personaId}@campus.squadpulse.org`;
-        const role = (credentials.role as string) || 'CSE 3rd Year • Flatmate';
-        
-        let avatar = (credentials.avatar as string) || '';
-        if (!avatar) {
-          if (personaId === 'rhea') {
-            avatar = 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150';
-          } else if (personaId === 'dev') {
-            avatar = 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150';
-          } else if (personaId === 'tanvi') {
-            avatar = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150';
-          } else {
-            avatar = 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150';
-          }
-        }
-
-        return {
-          id: personaId,
-          name,
-          email,
-          image: avatar,
-        };
-      },
-    }),
+      : [
+          // Fallback Google provider entry so NextAuth recognizes the provider route
+          Google({
+            clientId: googleClientId || 'missing-client-id',
+            clientSecret: googleClientSecret || 'missing-client-secret',
+          }),
+        ]),
   ],
   pages: {
     signIn: '/login',
@@ -62,14 +29,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     jwt({ token, user, account }) {
       if (user) {
         token.id = user.id;
-        token.provider = account?.provider || 'demo-login';
+        token.provider = account?.provider || 'google';
+        token.email = user.email;
+        token.name = user.name;
+        token.image = user.image;
       }
       return token;
     },
     session({ session, token }) {
       if (session.user && token) {
-        (session.user as any).id = token.id || token.sub;
-        (session.user as any).provider = token.provider || 'demo-login';
+        session.user.id = (token.id as string) || (token.sub as string);
+        session.user.name = token.name as string;
+        session.user.email = token.email as string;
+        session.user.image = token.image as string;
+        (session.user as any).provider = 'google';
       }
       return session;
     },

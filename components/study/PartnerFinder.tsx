@@ -66,7 +66,22 @@ export function PartnerFinder() {
   const [slotRole2, setSlotRole2] = useState('ML & Data Engineer');
   const [slotRole3, setSlotRole3] = useState('');
 
-  const activePersona = personas[currentPersonaId] || personas.aman;
+  const activePersona =
+    personas[currentPersonaId] ||
+    Object.values(personas)[0] || {
+      id: 'me',
+      name: 'Resident',
+      room: 'Flat 402',
+      role: 'Resident',
+      avatar: '',
+      tagline: '',
+      bio: '',
+      skills: [],
+      upiId: '',
+      phone: '',
+      accentColor: 'indigo' as const,
+      stats: { studyStreak: 0, choresCompleted: 0, debtBalance: 0 },
+    };
 
   // Filter member profiles by skill
   const memberList = Object.values(personas).filter((member) => {
@@ -305,7 +320,7 @@ export function PartnerFinder() {
         {/* Hackathon Projects Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           {hackathons.map((project) => {
-            const teamLead = personas[project.teamLeadId] || personas.aman;
+            const teamLead = personas[project.teamLeadId] || { name: 'Lead', avatar: '' };
             const openSlotsCount = project.slots.filter((s) => !s.assignedPersonaId).length;
             const isLead = project.teamLeadId === currentPersonaId;
 

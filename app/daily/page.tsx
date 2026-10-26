@@ -63,10 +63,25 @@ export default function DailyLifePage() {
     return () => window.removeEventListener('hashchange', handleHash);
   }, []);
 
-  const currentPersona = personas[currentPersonaId];
+  const currentPersona =
+    personas[currentPersonaId] ||
+    Object.values(personas)[0] || {
+      id: 'me',
+      name: 'Hostel Resident',
+      room: 'Flat 402',
+      role: 'Resident',
+      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+      tagline: 'Active Member',
+      bio: '',
+      skills: ['Team Player'],
+      upiId: 'user@upi',
+      phone: '',
+      accentColor: 'emerald' as const,
+      stats: { studyStreak: 0, choresCompleted: 0, debtBalance: 0 },
+    };
 
   // Quick stats calculations
-  const freeRoommatesCount = (['aman', 'rhea', 'dev', 'tanvi'] as const).filter(
+  const freeRoommatesCount = Object.keys(personas).filter(
     (id) =>
       statuses[id]?.badge === 'Free to Chill' ||
       statuses[id]?.badge === 'Canteen / Mess'
@@ -113,7 +128,7 @@ export default function DailyLifePage() {
           {/* Active Persona Context Badge */}
           <div className="flex items-center gap-3 bg-muted/50 border border-border/80 rounded-2xl p-3 shrink-0">
             <Avatar
-              name={currentPersona?.name || 'Aman'}
+              name={currentPersona?.name || 'Resident'}
               src={currentPersona?.avatar}
               size="md"
               statusDot="online"

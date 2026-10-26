@@ -39,7 +39,22 @@ export function GroupPolls() {
   const [durationHours, setDurationHours] = useState('24');
   const [formError, setFormError] = useState<string | null>(null);
 
-  const activePersona = personas[currentPersonaId] || personas.aman;
+  const activePersona =
+    personas[currentPersonaId] ||
+    Object.values(personas)[0] || {
+      id: 'me',
+      name: 'Resident',
+      room: 'Flat 402',
+      role: 'Resident',
+      avatar: '',
+      tagline: '',
+      bio: '',
+      skills: [],
+      upiId: '',
+      phone: '',
+      accentColor: 'rose' as const,
+      stats: { studyStreak: 0, choresCompleted: 0, debtBalance: 0 },
+    };
 
   // Helper to check if poll is active
   const isPollActive = (expiresAt: string) => {
@@ -408,14 +423,15 @@ export function GroupPolls() {
                     <div className="flex items-center gap-1.5">
                       <Users className="w-3.5 h-3.5" />
                       <span>
-                        {uniqueVoters.length} of 4 roommates voted
+                        {uniqueVoters.length} of {Math.max(Object.keys(personas).length, 1)} roommates voted
                       </span>
                     </div>
 
                     <div className="flex items-center gap-1">
-                      {['aman', 'rhea', 'dev', 'tanvi'].map((id) => {
+                      {Object.keys(personas).map((id) => {
                         const hasVotedAny = uniqueVoters.includes(id as PersonaId);
                         const p = personas[id as PersonaId];
+                        if (!p) return null;
                         return (
                           <span
                             key={id}

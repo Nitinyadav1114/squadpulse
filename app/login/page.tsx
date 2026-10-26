@@ -3,88 +3,37 @@
 import React, { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
-import { useSquadStore } from '@/lib/store';
-import { PersonaId } from '@/types';
-import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { GithubIcon } from '@/components/ui/GithubIcon';
-import { Sparkles, ArrowRight, ShieldCheck, Zap, AlertCircle } from 'lucide-react';
+import { Sparkles, ArrowRight, ShieldCheck, AlertCircle, Copy, Check, KeyRound } from 'lucide-react';
 import Link from 'next/link';
 
 function LoginFormContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const authError = searchParams.get('error');
-  const { personas, setActivePersona, setAuthUser } = useSquadStore();
-  const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
-  const [customName, setCustomName] = useState('');
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [copiedRedirect, setCopiedRedirect] = useState(false);
+
+  const redirectUri = typeof window !== 'undefined'
+    ? `${window.location.origin}/api/auth/callback/google`
+    : 'https://squadpulse-phi.vercel.app/api/auth/callback/google';
 
   const handleGoogleSignIn = async () => {
     try {
-      setLoadingProvider('google');
+      setIsGoogleLoading(true);
       await signIn('google', { callbackUrl: '/' });
     } catch (err) {
       console.error('Google sign-in error:', err);
-      setLoadingProvider(null);
+      setIsGoogleLoading(false);
     }
   };
 
-  const handleDemoSignIn = async (personaId: PersonaId) => {
-    try {
-      setLoadingProvider(personaId);
-      const persona = personas[personaId];
-
-      setActivePersona(personaId);
-      setAuthUser({
-        id: persona.id,
-        name: persona.name,
-        email: `${persona.id}@campus.squadpulse.org`,
-        image: persona.avatar,
-        provider: 'demo',
-      });
-
-      await signIn('demo-login', {
-        personaId: persona.id,
-        name: persona.name,
-        email: `${persona.id}@campus.squadpulse.org`,
-        role: persona.role,
-        avatar: persona.avatar,
-        redirect: false,
-      });
-
-      router.push('/');
-    } catch (err) {
-      console.error('Demo sign-in error:', err);
-      setLoadingProvider(null);
-    }
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedRedirect(true);
+    setTimeout(() => setCopiedRedirect(false), 2500);
   };
-
-  const handleCustomGuestSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmed = customName.trim() || 'Guest Roommate';
-    setLoadingProvider('custom-guest');
-
-    setActivePersona('aman');
-    setAuthUser({
-      id: 'custom-guest',
-      name: trimmed,
-      email: `${trimmed.toLowerCase().replace(/\s+/g, '.')}@campus.squadpulse.org`,
-      image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-      provider: 'guest',
-    });
-
-    await signIn('demo-login', {
-      personaId: 'custom-guest',
-      name: trimmed,
-      email: `${trimmed.toLowerCase().replace(/\s+/g, '.')}@campus.squadpulse.org`,
-      role: 'Guest Roommate • Flat 402',
-      redirect: false,
-    });
-
-    router.push('/');
-  };
-
-  const personaList = Object.values(personas);
 
   return (
     <div className="min-h-[80vh] flex flex-col items-center justify-center py-10 px-4">
@@ -98,45 +47,55 @@ function LoginFormContent() {
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-emerald-400 flex items-center justify-center text-white shadow-md">
               <Sparkles className="w-5 h-5" />
             </div>
-            <span className="text-2xl font-extrabold tracking-tight text-foreground">
+            <span className="font-extrabold text-xl tracking-tight text-foreground">
               SquadPulse
             </span>
           </Link>
-          <div className="inline-block px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-semibold border border-emerald-500/20">
-            Free & Open Source Campus OS
-          </div>
-          <h1 className="text-2xl font-bold text-foreground">Welcome to Flat 402</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            Sign in to your group
+          </h1>
           <p className="text-xs text-muted-foreground">
-            Sign in with Google or select a persona for zero-config 1-click access.
+            Connect with your official Google account to access your flat chores, carpools, group wallet, and study wing.
           </p>
         </div>
 
-        {/* Auth Error / Setup Notice Banner */}
-        {authError && (
-          <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-start gap-2.5 animate-in fade-in duration-200">
-            <AlertCircle className="w-4 h-4 shrink-0 text-amber-400 mt-0.5" />
+        {/* Configuration Error / Setup Helper Notice */}
+        {authError === 'Configuration' && (
+          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs space-y-3 animate-in fade-in">
+            <div className="flex items-center gap-2 font-bold text-amber-400">
+              <KeyRound className="w-4 h-4 shrink-0" />
+              <span>Google OAuth Setup Required</span>
+            </div>
+            <p className="text-[11px] text-muted-foreground leading-relaxed">
+              Google OAuth needs <code className="px-1 py-0.5 rounded bg-muted text-foreground">GOOGLE_CLIENT_ID</code> and <code className="px-1 py-0.5 rounded bg-muted text-foreground">GOOGLE_CLIENT_SECRET</code> set in your Vercel project environment variables.
+            </p>
             <div className="space-y-1">
-              <p className="font-semibold text-amber-200">
-                {authError === 'Configuration'
-                  ? 'Google OAuth Credentials Notice'
-                  : `Authentication Notice (${authError})`}
-              </p>
-              <p className="text-muted-foreground text-[11px] leading-relaxed">
-                {authError === 'Configuration'
-                  ? 'Google OAuth credentials (GOOGLE_CLIENT_ID & GOOGLE_CLIENT_SECRET) need to be configured in your environment or Vercel dashboard. In the meantime, you can explore the app immediately with 1-click using any roommate persona below!'
-                  : 'Could not complete third-party OAuth exchange. You can jump straight in using the 1-click roommate personas below.'}
-              </p>
+              <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider block">
+                Authorized Redirect URI for Google Cloud Console:
+              </span>
+              <div className="flex items-center gap-1.5 p-2 rounded-xl bg-background/80 border border-border text-[11px] font-mono text-foreground break-all">
+                <span className="flex-1 truncate">{redirectUri}</span>
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(redirectUri)}
+                  className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-foreground cursor-pointer"
+                  title="Copy Redirect URI"
+                >
+                  {copiedRedirect ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                </button>
+              </div>
             </div>
           </div>
         )}
 
-        {/* Google OAuth Button */}
-        <div className="space-y-2">
-          <button
-            type="button"
+        {/* Google OAuth Login Button */}
+        <div className="space-y-3">
+          <Button
+            variant="primary"
+            size="lg"
+            className="w-full flex items-center justify-center gap-3 py-3 rounded-2xl shadow-md cursor-pointer font-bold text-sm"
             onClick={handleGoogleSignIn}
-            disabled={loadingProvider !== null}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3.5 rounded-2xl bg-muted/60 hover:bg-muted text-foreground border border-border font-medium text-sm transition-all shadow-sm hover:shadow cursor-pointer disabled:opacity-50"
+            disabled={isGoogleLoading}
           >
             <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
               <path
@@ -156,84 +115,24 @@ function LoginFormContent() {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
               />
             </svg>
-            <span>
-              {loadingProvider === 'google' ? 'Redirecting to Google...' : 'Continue with Google'}
-            </span>
-          </button>
-          <div className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-            <span>OAuth 2.0 compliant • No password required</span>
+            <span>{isGoogleLoading ? 'Connecting to Google...' : 'Sign in with Google'}</span>
+          </Button>
+        </div>
+
+        {/* Security badge and GitHub link */}
+        <div className="pt-4 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
+          <div className="flex items-center gap-1.5">
+            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <span>OAuth 2.0 Verified</span>
           </div>
-        </div>
-
-        {/* Divider */}
-        <div className="relative flex items-center justify-center">
-          <div className="border-t border-border w-full" />
-          <span className="bg-card px-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider shrink-0">
-            Instant 1-Click Demo Personas
-          </span>
-          <div className="border-t border-border w-full" />
-        </div>
-
-        {/* Roommate Personas Grid */}
-        <div className="grid grid-cols-2 gap-2.5">
-          {personaList.map((p) => {
-            const isLoading = loadingProvider === p.id;
-            return (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() => handleDemoSignIn(p.id)}
-                disabled={loadingProvider !== null}
-                className="flex items-center gap-2.5 p-2.5 rounded-2xl border border-border bg-muted/20 hover:bg-muted/80 text-left transition-all cursor-pointer group hover:border-primary/40 disabled:opacity-50"
-              >
-                <Avatar name={p.name} src={p.avatar} size="sm" />
-                <div className="min-w-0 flex-1">
-                  <div className="text-xs font-semibold text-foreground truncate group-hover:text-primary transition-colors">
-                    {p.name}
-                  </div>
-                  <div className="text-[10px] text-muted-foreground truncate">
-                    {p.role.split('•')[0]}
-                  </div>
-                </div>
-                <Zap className="w-3.5 h-3.5 text-muted-foreground group-hover:text-amber-400 shrink-0 transition-colors" />
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Custom Guest Name */}
-        <form onSubmit={handleCustomGuestSignIn} className="space-y-2 pt-2 border-t border-border">
-          <span className="text-xs font-medium text-foreground block">
-            Or type your custom guest name:
-          </span>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={customName}
-              onChange={(e) => setCustomName(e.target.value)}
-              placeholder="e.g. Priyanshu / Roommate"
-              className="flex-1 px-3 py-2 rounded-xl border border-border bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
-            />
-            <Button type="submit" size="sm" disabled={loadingProvider !== null}>
-              Enter Flat
-            </Button>
-          </div>
-        </form>
-
-        {/* Links */}
-        <div className="flex items-center justify-between text-xs text-muted-foreground pt-2">
-          <Link href="/" className="hover:text-foreground transition-colors flex items-center gap-1">
-            <span>← Back to Landing Page</span>
-          </Link>
           <a
             href="https://github.com/Nitinyadav1114/squadpulse"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-foreground transition-colors flex items-center gap-1"
+            className="flex items-center gap-1 hover:text-foreground transition-colors"
           >
             <GithubIcon className="w-3.5 h-3.5" />
-            <span>GitHub</span>
+            <span>Open Source</span>
           </a>
         </div>
       </div>
@@ -246,10 +145,7 @@ export default function LoginPage() {
     <Suspense
       fallback={
         <div className="min-h-[80vh] flex items-center justify-center">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Sparkles className="w-4 h-4 animate-spin text-primary" />
-            <span>Loading authentication...</span>
-          </div>
+          <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
         </div>
       }
     >

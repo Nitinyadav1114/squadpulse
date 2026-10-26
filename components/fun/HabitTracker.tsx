@@ -32,7 +32,22 @@ export function HabitTracker() {
   );
   const [pokeNotification, setPokeNotification] = useState<string | null>(null);
 
-  const activePersona = personas[currentPersonaId] || personas.aman;
+  const activePersona =
+    personas[currentPersonaId] ||
+    Object.values(personas)[0] || {
+      id: 'me',
+      name: 'Resident',
+      room: 'Flat 402',
+      role: 'Resident',
+      avatar: '',
+      tagline: '',
+      bio: '',
+      skills: [],
+      upiId: '',
+      phone: '',
+      accentColor: 'rose' as const,
+      stats: { studyStreak: 0, choresCompleted: 0, debtBalance: 0 },
+    };
   const todayStr = format(new Date(), 'yyyy-MM-dd');
 
   // Find active challenge
@@ -111,7 +126,7 @@ export function HabitTracker() {
     }
   };
 
-  const roommates: PersonaId[] = ['aman', 'rhea', 'dev', 'tanvi'];
+  const roommates: PersonaId[] = Object.keys(personas);
 
   return (
     <div id="habits" className="space-y-6">

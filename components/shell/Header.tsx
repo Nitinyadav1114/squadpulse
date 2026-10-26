@@ -44,7 +44,22 @@ export function Header() {
   const [isSignInModalOpen, setIsSignInModalOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const activePersona = personas[currentPersonaId] || personas.aman;
+  const activePersona =
+    personas[currentPersonaId] ||
+    Object.values(personas)[0] || {
+      id: 'me',
+      name: authUser?.name || 'Resident',
+      room: 'Flat 402',
+      role: 'Resident',
+      avatar: authUser?.image || '',
+      tagline: '',
+      bio: '',
+      skills: [],
+      upiId: '',
+      phone: '',
+      accentColor: 'indigo' as const,
+      stats: { studyStreak: 0, choresCompleted: 0, debtBalance: 0 },
+    };
   const unreadPingsCount = hangoutPings.filter((p) => !p.isRead).length;
 
   // Sync theme with HTML class
@@ -169,9 +184,7 @@ export function Header() {
                     {authUser.name}
                   </span>
                   <span className="text-[10px] text-muted-foreground leading-tight truncate">
-                    {authUser.name === activePersona.name
-                      ? `${activePersona.role.split('•')[0].trim()} • Flat 402`
-                      : `as ${activePersona.name} (${activePersona.role.split('•')[0].trim()})`}
+                    Flat 402
                   </span>
                 </div>
                 <ChevronDown className="w-3.5 h-3.5 text-muted-foreground hidden sm:block" />
@@ -202,61 +215,20 @@ export function Header() {
                     </div>
                   </div>
 
-                  {/* Roommate Perspective Switcher Section */}
+                  {/* Group Info Section */}
                   <div className="px-3 py-1.5 border-b border-border/80 mb-1 flex items-center justify-between">
                     <div>
                       <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block">
-                        Perspective Switcher
+                        Your Group
                       </span>
                       <p className="text-[10px] text-muted-foreground">
-                        Select persona to check debts & chores:
+                        Flat 402 • {personaList.length} members
                       </p>
                     </div>
                     <UserCheck className="w-3.5 h-3.5 text-muted-foreground" />
                   </div>
 
-                  <div className="space-y-1">
-                    {personaList.map((p) => {
-                      const isSelected = p.id === currentPersonaId;
-                      return (
-                        <button
-                          key={p.id}
-                          onClick={() => {
-                            setActivePersona(p.id);
-                            setIsDropdownOpen(false);
-                          }}
-                          className={cn(
-                            'w-full flex items-center justify-between p-2 rounded-xl text-left transition-all cursor-pointer',
-                            isSelected
-                              ? 'bg-primary/10 border border-primary/20 text-foreground font-medium'
-                              : 'hover:bg-muted text-muted-foreground hover:text-foreground'
-                          )}
-                        >
-                          <div className="flex items-center gap-2.5">
-                            <Avatar name={p.name} src={p.avatar} size="sm" />
-                            <div>
-                              <div className="text-xs font-semibold leading-tight text-foreground">
-                                {p.name}
-                              </div>
-                              <div className="text-[10px] text-muted-foreground">
-                                {p.role}
-                              </div>
-                            </div>
-                          </div>
-
-                          {isSelected ? (
-                            <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
-                              <Check className="w-3 h-3" />
-                            </div>
-                          ) : (
-                            <span className="text-[10px] text-muted-foreground">Switch</span>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* Actions: Tour, Reset Demo Data, Sign Out */}
+                  {/* Actions: Landing Page, Sign Out */}
                   <div className="mt-2 pt-2 border-t border-border space-y-1">
                     <Link
                       href="/landing"
@@ -266,17 +238,6 @@ export function Header() {
                       <Compass className="w-3.5 h-3.5 text-indigo-400" />
                       <span>Explore Landing Page Tour</span>
                     </Link>
-
-                    <button
-                      onClick={() => {
-                        resetToSeedData();
-                        setIsDropdownOpen(false);
-                      }}
-                      className="w-full flex items-center gap-2 p-2 rounded-xl text-xs text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
-                    >
-                      <RotateCcw className="w-3.5 h-3.5" />
-                      <span>Reset Demo Data</span>
-                    </button>
 
                     <button
                       onClick={handleSignOut}

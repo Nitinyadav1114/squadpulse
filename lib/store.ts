@@ -95,6 +95,7 @@ export interface SquadPulseState {
   resetToSeedData: () => void;
   setAuthUser: (user: AuthUser | null) => void;
   logoutUser: () => void;
+  addRoommate: (name: string, role?: string, upiId?: string) => void;
 
   // Daily Life Actions
   updateStatus: (badge: StatusBadge, customMessage: string, durationMinutes: number) => void;
@@ -143,7 +144,7 @@ export const useSquadStore = create<SquadPulseState>()(
   persist(
     (set, get) => ({
       // Initial System State
-      currentPersonaId: 'aman',
+      currentPersonaId: 'me',
       theme: 'dark',
       activeSection: 'hub',
       isSidebarCollapsed: false,
@@ -177,8 +178,63 @@ export const useSquadStore = create<SquadPulseState>()(
       setSidebarCollapsed: (collapsed) => set({ isSidebarCollapsed: collapsed }),
       togglePingDrawer: () => set((state) => ({ isPingDrawerOpen: !state.isPingDrawerOpen })),
       setPingDrawerOpen: (open) => set({ isPingDrawerOpen: open }),
-      setAuthUser: (authUser) => set({ authUser }),
+      setAuthUser: (authUser) => {
+        if (authUser) {
+          set((state) => {
+            const existing = state.personas[authUser.id];
+            const userPersona: Persona = existing || {
+              id: authUser.id,
+              name: authUser.name || 'Roommate',
+              room: 'Flat 402',
+              role: 'Resident',
+              avatar: authUser.image || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+              tagline: 'Active Member',
+              bio: '',
+              skills: ['Team Player'],
+              upiId: `${(authUser.email || 'user').split('@')[0]}@upi`,
+              phone: '',
+              accentColor: 'indigo',
+              stats: { studyStreak: 1, choresCompleted: 0, debtBalance: 0 },
+            };
+
+            return {
+              authUser,
+              currentPersonaId: authUser.id,
+              personas: {
+                ...state.personas,
+                [authUser.id]: userPersona,
+              },
+            };
+          });
+        } else {
+          set({ authUser: null });
+        }
+      },
       logoutUser: () => set({ authUser: null }),
+      addRoommate: (name, role, upiId) => {
+        const id = `roommate-${Date.now().toString(36)}`;
+        const newPersona: Persona = {
+          id,
+          name,
+          room: 'Flat 402',
+          role: role || 'Flatmate',
+          avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+          tagline: 'Flatmate',
+          bio: '',
+          skills: ['Roommate'],
+          upiId: upiId || `${name.toLowerCase().replace(/\s+/g, '')}@upi`,
+          phone: '',
+          accentColor: 'emerald',
+          stats: { studyStreak: 0, choresCompleted: 0, debtBalance: 0 },
+        };
+
+        set((state) => ({
+          personas: {
+            ...state.personas,
+            [id]: newPersona,
+          },
+        }));
+      },
 
       resetToSeedData: () =>
         set({

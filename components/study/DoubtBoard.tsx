@@ -72,7 +72,22 @@ export function DoubtBoard() {
   const [answerCodeSnippet, setAnswerCodeSnippet] = useState('');
   const [answerLanguage, setAnswerLanguage] = useState('TypeScript');
 
-  const activePersona = personas[currentPersonaId] || personas.aman;
+  const activePersona =
+    personas[currentPersonaId] ||
+    Object.values(personas)[0] || {
+      id: 'me',
+      name: 'Resident',
+      room: 'Flat 402',
+      role: 'Resident',
+      avatar: '',
+      tagline: '',
+      bio: '',
+      skills: [],
+      upiId: '',
+      phone: '',
+      accentColor: 'indigo' as const,
+      stats: { studyStreak: 0, choresCompleted: 0, debtBalance: 0 },
+    };
 
   // Filter doubts by search, subject, urgency
   const filteredDoubts = doubts.filter((d) => {
@@ -260,7 +275,7 @@ export function DoubtBoard() {
           </div>
         ) : (
           filteredDoubts.map((doubt) => {
-            const author = personas[doubt.authorId] || personas.aman;
+            const author = personas[doubt.authorId] || { name: 'Roommate', avatar: '' };
             const isAuthor = doubt.authorId === currentPersonaId;
             const hasUpvotedDoubt = doubt.upvotes.includes(currentPersonaId);
             const isExpanded = expandedDoubtId === doubt.id;
@@ -416,7 +431,7 @@ export function DoubtBoard() {
                       ) : (
                         <div className="space-y-3">
                           {doubt.answers.map((answer) => {
-                            const answerAuthor = personas[answer.authorId] || personas.aman;
+                            const answerAuthor = personas[answer.authorId] || { name: 'Roommate', avatar: '' };
                             const isAnswerAuthor = answer.authorId === currentPersonaId;
                             const hasUpvotedAnswer = answer.upvotes.includes(currentPersonaId);
 

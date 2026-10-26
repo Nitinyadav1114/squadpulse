@@ -56,7 +56,22 @@ export default function FunCulturePage() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, [setActiveSection]);
 
-  const activePersona = personas[currentPersonaId] || personas.aman;
+  const activePersona =
+    personas[currentPersonaId] ||
+    Object.values(personas)[0] || {
+      id: 'me',
+      name: 'Resident',
+      room: 'Flat 402',
+      role: 'Resident',
+      avatar: '',
+      tagline: '',
+      bio: '',
+      skills: [],
+      upiId: '',
+      phone: '',
+      accentColor: 'rose' as const,
+      stats: { studyStreak: 0, choresCompleted: 0, debtBalance: 0 },
+    };
 
   // Compute Fun Metrics
   const activePollsCount = polls.filter((p) => new Date(p.expiresAt).getTime() > Date.now()).length;

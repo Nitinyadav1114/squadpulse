@@ -227,7 +227,22 @@ export function DailyCoding() {
   const [selectedSubmissionTab, setSelectedSubmissionTab] = useState<PersonaId | 'all'>('all');
   const [justSubmitted, setJustSubmitted] = useState(false);
 
-  const activePersona = personas[currentPersonaId] || personas.aman;
+  const activePersona =
+    personas[currentPersonaId] ||
+    Object.values(personas)[0] || {
+      id: 'me',
+      name: 'Resident',
+      room: 'Flat 402',
+      role: 'Resident',
+      avatar: '',
+      tagline: '',
+      bio: '',
+      skills: [],
+      upiId: '',
+      phone: '',
+      accentColor: 'emerald' as const,
+      stats: { studyStreak: 0, choresCompleted: 0, debtBalance: 0 },
+    };
   const hasUserSubmittedToday = codingProblem.submissions.some(
     (s) => s.personaId === currentPersonaId
   );
@@ -501,7 +516,7 @@ export function DailyCoding() {
             ) : (
               <div className="space-y-4">
                 {filteredSubmissions.map((sub) => {
-                  const author = personas[sub.personaId] || personas.aman;
+                  const author = personas[sub.personaId] || { name: 'Roommate', avatar: '' };
                   const isCurrentUser = sub.personaId === currentPersonaId;
 
                   return (

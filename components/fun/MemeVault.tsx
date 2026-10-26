@@ -40,7 +40,7 @@ export function MemeVault() {
   const [newType, setNewType] = useState<MemeType>('HostelChronicle');
   const [newContent, setNewContent] = useState('');
   const [newContext, setNewContext] = useState('');
-  const [newCreditedPersona, setNewCreditedPersona] = useState<PersonaId>('dev');
+  const [newCreditedPersona, setNewCreditedPersona] = useState<PersonaId>(() => Object.keys(personas)[0] || '');
   const [newTagsString, setNewTagsString] = useState('');
 
   // Extract all unique tags dynamically
@@ -238,10 +238,11 @@ export function MemeVault() {
               className="text-xs px-2.5 py-1 rounded-lg border border-border bg-background"
             >
               <option value="All">All Roommates</option>
-              <option value="aman">Aman</option>
-              <option value="rhea">Rhea</option>
-              <option value="dev">Dev</option>
-              <option value="tanvi">Tanvi</option>
+              {Object.values(personas).map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -462,7 +463,7 @@ export function MemeVault() {
               type="text"
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
-              placeholder="e.g. When Dev ordered ₹1200 of Biryani during finals"
+              placeholder="e.g. When someone ordered ₹1200 of Biryani during finals"
               className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
               required
             />
@@ -516,10 +517,11 @@ export function MemeVault() {
                 onChange={(e) => setNewCreditedPersona(e.target.value as PersonaId)}
                 className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
               >
-                <option value="aman">Aman</option>
-                <option value="rhea">Rhea</option>
-                <option value="dev">Dev</option>
-                <option value="tanvi">Tanvi</option>
+                {Object.values(personas).map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
               </select>
             </div>
           </div>

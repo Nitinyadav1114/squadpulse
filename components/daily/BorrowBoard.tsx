@@ -457,18 +457,18 @@ export function BorrowBoard() {
                             ? 'Wanted by'
                             : 'Offered by'}{' '}
                           <span className="font-medium text-foreground">
-                            {isOwner ? 'You' : owner?.name.split(' ')[0]}
+                            {isOwner ? 'You' : (owner?.name || 'Owner').split(' ')[0]}
                           </span>
                         </span>
                       </div>
 
                       {borrower && (
                         <div className="flex items-center gap-1.5">
-                          <Avatar name={borrower.name} src={borrower.avatar} size="xs" />
+                          <Avatar name={borrower?.name || 'Borrower'} src={borrower?.avatar} size="xs" />
                           <span className="text-muted-foreground text-[10px]">
                             With:{' '}
                             <span className="font-medium text-foreground">
-                              {isBorrower ? 'You' : borrower.name.split(' ')[0]}
+                              {isBorrower ? 'You' : (borrower?.name || 'Borrower').split(' ')[0]}
                             </span>
                           </span>
                         </div>

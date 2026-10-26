@@ -39,13 +39,27 @@ import {
 
 export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
   const router = useRouter();
-  const { authUser, currentPersonaId, personas, setActivePersona, setAuthUser } = useSquadStore();
+  const { authUser, currentPersonaId, personas } = useSquadStore();
   const [isSignInModalOpen, setIsSignInModalOpen] = useState(false);
   const [activeWingTab, setActiveWingTab] = useState<'daily' | 'study' | 'fun'>('daily');
-  const [isDemoLoading, setIsDemoLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
-  const activePersona = personas[currentPersonaId] || personas.aman;
+  const activePersona =
+    personas[currentPersonaId] ||
+    Object.values(personas)[0] || {
+      id: 'me',
+      name: 'Resident',
+      room: 'Flat 402',
+      role: 'Resident',
+      avatar: '',
+      tagline: '',
+      bio: '',
+      skills: [],
+      upiId: '',
+      phone: '',
+      accentColor: 'indigo' as const,
+      stats: { studyStreak: 0, choresCompleted: 0, debtBalance: 0 },
+    };
 
   const handleGoogleSignIn = async () => {
     try {
@@ -54,40 +68,6 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
     } catch (err) {
       console.error('Google sign in error:', err);
       setIsGoogleLoading(false);
-    }
-  };
-
-  const handle1ClickDemo = async () => {
-    try {
-      setIsDemoLoading(true);
-      setActivePersona('aman');
-      setAuthUser({
-        id: 'aman',
-        name: 'Aman Sharma',
-        email: 'aman@campus.squadpulse.org',
-        image: personas.aman.avatar,
-        provider: 'demo',
-      });
-
-      await signIn('demo-login', {
-        personaId: 'aman',
-        name: 'Aman Sharma',
-        email: 'aman@campus.squadpulse.org',
-        role: personas.aman.role,
-        avatar: personas.aman.avatar,
-        redirect: false,
-      });
-
-      setIsDemoLoading(false);
-      if (onEnterApp) {
-        onEnterApp();
-      } else {
-        router.push('/');
-      }
-    } catch (e) {
-      console.error(e);
-      setIsDemoLoading(false);
-      if (onEnterApp) onEnterApp();
     }
   };
 
@@ -173,20 +153,29 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={handle1ClickDemo}
-                disabled={isDemoLoading}
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/60 hover:bg-muted border border-border text-xs font-medium text-foreground transition-all cursor-pointer"
+                onClick={handleGoogleSignIn}
+                disabled={isGoogleLoading}
+                className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-foreground text-background hover:bg-foreground/90 text-xs font-semibold shadow-sm transition-all cursor-pointer disabled:opacity-50"
               >
-                <Zap className="w-3.5 h-3.5 text-amber-400" />
-                <span>1-Click Demo</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsSignInModalOpen(true)}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-foreground text-background hover:bg-foreground/90 text-xs font-semibold shadow-sm transition-all cursor-pointer"
-              >
-                <span>Sign In</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24">
+                  <path
+                    fill="#4285F4"
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                  />
+                </svg>
+                <span>{isGoogleLoading ? 'Connecting...' : 'Sign in with Google'}</span>
               </button>
             </div>
           )}
@@ -226,7 +215,7 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
               <div className="text-left text-xs">
                 <p className="font-semibold text-foreground">Welcome back, {authUser.name}!</p>
                 <p className="text-muted-foreground text-[10px]">
-                  Signed in via {authUser.provider === 'google' ? 'Google OAuth' : 'Guest Demo'} • Flat 402 Active
+                  Signed in via Google OAuth • Flat 402 Active
                 </p>
               </div>
             </div>
@@ -245,10 +234,10 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
             <button
               type="button"
               onClick={handleGoogleSignIn}
-              disabled={isGoogleLoading || isDemoLoading}
-              className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-card hover:bg-muted/90 text-foreground border border-border/80 font-semibold text-sm shadow-md hover:shadow-lg transition-all cursor-pointer hover:scale-[1.01] disabled:opacity-50"
+              disabled={isGoogleLoading}
+              className="flex items-center gap-3 px-6 py-3.5 rounded-2xl bg-foreground text-background hover:bg-foreground/90 font-bold text-sm shadow-xl shadow-foreground/10 hover:shadow-foreground/20 transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
             >
-              <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
                 <path
                   fill="#4285F4"
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -269,26 +258,15 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
               <span>{isGoogleLoading ? 'Connecting to Google...' : 'Sign in with Google'}</span>
             </button>
 
-            {/* Instant 1-Click Demo */}
-            <button
-              type="button"
-              onClick={handle1ClickDemo}
-              disabled={isDemoLoading}
-              className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-semibold text-sm shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all cursor-pointer hover:scale-[1.01] disabled:opacity-50"
-            >
-              <Zap className="w-4 h-4 text-amber-300" />
-              <span>{isDemoLoading ? 'Launching Demo...' : 'Instant 1-Click Demo'}</span>
-            </button>
-
             {/* GitHub Repo */}
             <a
               href="https://github.com/Nitinyadav1114/squadpulse"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-3 rounded-2xl bg-muted/40 hover:bg-muted border border-border text-muted-foreground hover:text-foreground text-sm font-medium transition-all"
+              className="flex items-center gap-2 px-5 py-3.5 rounded-2xl bg-card hover:bg-muted border border-border text-foreground text-sm font-semibold shadow-sm transition-all hover:scale-[1.01]"
             >
               <GithubIcon className="w-4 h-4" />
-              <span>Fork on GitHub</span>
+              <span>Star on GitHub</span>
             </a>
           </div>
         )}
@@ -327,7 +305,7 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
             </div>
             <div className="flex items-center gap-2 text-xs font-medium text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-              <span>All 4 Roommates Connected</span>
+              <span>Roommates Connected</span>
             </div>
           </div>
 
@@ -343,15 +321,15 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
               </div>
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-medium text-foreground">Aman</span>
+                  <span className="font-medium text-foreground">Roommate 1</span>
                   <Badge variant="success" size="sm">Free to Chill</Badge>
                 </div>
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-medium text-foreground">Rhea</span>
+                  <span className="font-medium text-foreground">Roommate 2</span>
                   <Badge variant="study" size="sm">Library</Badge>
                 </div>
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-medium text-foreground">Dev</span>
+                  <span className="font-medium text-foreground">Roommate 3</span>
                   <Badge variant="warning" size="sm">In Class</Badge>
                 </div>
               </div>
@@ -368,7 +346,7 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
               <div className="text-xs space-y-1">
                 <p className="text-muted-foreground text-[11px]">Grocery Split Settlement:</p>
                 <p className="font-semibold text-foreground">
-                  Dev owes Aman <span className="text-rose-400">₹240</span>
+                  Roommate 2 owes Roommate 1 <span className="text-rose-400">₹240</span>
                 </p>
                 <div className="pt-1">
                   <span className="text-[10px] px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 font-medium">
@@ -389,11 +367,11 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
               <div className="text-xs space-y-1">
                 <p className="font-medium text-foreground">Water Can Refill</p>
                 <p className="text-muted-foreground text-[11px]">
-                  Assigned to <span className="text-foreground font-semibold">Dev</span>
+                  Assigned to <span className="text-foreground font-semibold">Active Member</span>
                 </p>
                 <div className="pt-1">
                   <span className="text-[10px] px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-400 font-medium">
-                    Auto-Cycles to Rhea
+                    Auto-Cycles Next
                   </span>
                 </div>
               </div>
@@ -410,7 +388,7 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
               <div className="text-xs space-y-1">
                 <p className="font-medium text-foreground">Find Median from Data Stream</p>
                 <p className="text-muted-foreground text-[11px]">
-                  Flat Leaderboard: <span className="text-emerald-400 font-semibold">Aman (100 pts)</span>
+                  Flat Leaderboard: <span className="text-emerald-400 font-semibold">Top Streak (100 pts)</span>
                 </p>
                 <div className="pt-1">
                   <span className="text-[10px] px-2 py-0.5 rounded-md bg-rose-500/10 text-rose-400 font-medium">
@@ -729,23 +707,23 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="rounded-3xl border border-border/70 bg-card p-6 space-y-4 shadow-sm">
             <div className="flex items-center gap-3">
-              <Avatar name="Aman Sharma" src={personas.aman.avatar} size="md" />
+              <Avatar name="Rahul Sharma" size="md" />
               <div>
-                <p className="font-semibold text-sm text-foreground">Aman Sharma</p>
-                <p className="text-[11px] text-muted-foreground">CSE 3rd Year • Tech Lead</p>
+                <p className="font-semibold text-sm text-foreground">Rahul S.</p>
+                <p className="text-[11px] text-muted-foreground">CSE 3rd Year • Flatmate</p>
               </div>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              "Tracking who paid for groceries was a nightmare with 4 roommates. SquadPulse minimized our pairwise debts down to a single UPI deep-link QR code. Zero confusion at month end."
+              "Tracking who paid for groceries was a nightmare with roommates. SquadPulse minimized our pairwise debts down to a single UPI deep-link QR code. Zero confusion at month end."
             </p>
           </div>
 
           <div className="rounded-3xl border border-border/70 bg-card p-6 space-y-4 shadow-sm">
             <div className="flex items-center gap-3">
-              <Avatar name="Rhea Sen" src={personas.rhea.avatar} size="md" />
+              <Avatar name="Priya Patel" size="md" />
               <div>
-                <p className="font-semibold text-sm text-foreground">Rhea Sen</p>
-                <p className="text-[11px] text-muted-foreground">Design Lead • Flatmate</p>
+                <p className="font-semibold text-sm text-foreground">Priya P.</p>
+                <p className="text-[11px] text-muted-foreground">Design Lead • Hostel Resident</p>
               </div>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
@@ -755,10 +733,10 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
 
           <div className="rounded-3xl border border-border/70 bg-card p-6 space-y-4 shadow-sm">
             <div className="flex items-center gap-3">
-              <Avatar name="Dev Malhotra" src={personas.dev.avatar} size="md" />
+              <Avatar name="Arjun Verma" size="md" />
               <div>
-                <p className="font-semibold text-sm text-foreground">Dev Malhotra</p>
-                <p className="text-[11px] text-muted-foreground">Backend & Cloud • Flatmate</p>
+                <p className="font-semibold text-sm text-foreground">Arjun V.</p>
+                <p className="text-[11px] text-muted-foreground">Backend Dev • Flatmate</p>
               </div>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
@@ -803,20 +781,39 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
             <button
               type="button"
               onClick={handleGoogleSignIn}
-              disabled={isGoogleLoading || isDemoLoading}
+              disabled={isGoogleLoading}
               className="flex items-center gap-2.5 px-6 py-3.5 rounded-2xl bg-foreground text-background font-bold text-sm hover:opacity-95 transition-all cursor-pointer shadow-lg disabled:opacity-50"
             >
+              <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                <path
+                  fill="#4285F4"
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                />
+                <path
+                  fill="#EA4335"
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                />
+              </svg>
               <span>{isGoogleLoading ? 'Connecting to Google...' : 'Sign in with Google'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
-            <button
-              type="button"
-              onClick={handle1ClickDemo}
+            <a
+              href="https://github.com/Nitinyadav1114/squadpulse"
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-card border border-border hover:bg-muted text-foreground font-semibold text-sm transition-all cursor-pointer"
             >
-              <Zap className="w-4 h-4 text-amber-400" />
-              <span>Explore Live Demo</span>
-            </button>
+              <GithubIcon className="w-4 h-4" />
+              <span>GitHub Repository</span>
+            </a>
           </div>
         </div>
       </section>

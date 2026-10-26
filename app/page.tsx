@@ -49,7 +49,22 @@ export default function SquadHubPage() {
     togglePingDrawer,
   } = useSquadStore();
 
-  const activePersona = personas[currentPersonaId] || personas.aman;
+  const activePersona =
+    personas[currentPersonaId] ||
+    Object.values(personas)[0] || {
+      id: 'me',
+      name: authUser?.name || 'Resident',
+      room: 'Flat 402',
+      role: 'Resident',
+      avatar: authUser?.image || '',
+      tagline: '',
+      bio: '',
+      skills: [],
+      upiId: '',
+      phone: '',
+      accentColor: 'indigo' as const,
+      stats: { studyStreak: 0, choresCompleted: 0, debtBalance: 0 },
+    };
   const activeStatus = statuses[currentPersonaId];
 
   // Dynamic calculations
@@ -446,7 +461,7 @@ export default function SquadHubPage() {
                         </Button>
                       ) : (
                         <span className="text-[11px] text-muted-foreground italic">
-                          Assigned to {assignee?.name.split(' ')[0]}
+                          Assigned to {(assignee?.name || 'Roommate').split(' ')[0]}
                         </span>
                       )}
                     </div>
@@ -496,12 +511,12 @@ export default function SquadHubPage() {
                         <div className="flex items-center gap-1.5">
                           <Avatar name={debtor?.name || debt.debtorId} size="xs" />
                           <span className="font-semibold">
-                            {isDebtorMe ? 'You' : debtor?.name.split(' ')[0]}
+                            {isDebtorMe ? 'You' : (debtor?.name || debt.debtorId).split(' ')[0]}
                           </span>
                           <span className="text-muted-foreground">owes</span>
                           <Avatar name={creditor?.name || debt.creditorId} size="xs" />
                           <span className="font-semibold">
-                            {isCreditorMe ? 'You' : creditor?.name.split(' ')[0]}
+                            {isCreditorMe ? 'You' : (creditor?.name || debt.creditorId).split(' ')[0]}
                           </span>
                         </div>
                         <span className="font-extrabold text-sm text-foreground">
@@ -524,7 +539,7 @@ export default function SquadHubPage() {
 
                       {isCreditorMe && (
                         <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium text-right">
-                          Pending payment from {debtor?.name.split(' ')[0]}
+                          Pending payment from {(debtor?.name || debt.debtorId).split(' ')[0]}
                         </div>
                       )}
                     </div>

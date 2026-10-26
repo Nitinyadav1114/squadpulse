@@ -40,7 +40,22 @@ export default function StudyWingPage() {
 
   const [activeTab, setActiveTab] = useState<StudyTab>('all');
 
-  const activePersona = personas[currentPersonaId] || personas.aman;
+  const activePersona =
+    personas[currentPersonaId] ||
+    Object.values(personas)[0] || {
+      id: 'me',
+      name: 'Resident',
+      room: 'Flat 402',
+      role: 'Resident',
+      avatar: '',
+      tagline: '',
+      bio: '',
+      skills: [],
+      upiId: '',
+      phone: '',
+      accentColor: 'emerald' as const,
+      stats: { studyStreak: 0, choresCompleted: 0, debtBalance: 0 },
+    };
 
   // Overview calculations
   const unresolvedDoubtsCount = doubts.filter((d) => !d.isResolved).length;

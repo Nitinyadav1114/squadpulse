@@ -81,7 +81,7 @@ export function ChoresWheel() {
   const [selectedChoreId, setSelectedChoreId] = useState<string>(chores[0]?.id || '');
   const [completionNote, setCompletionNote] = useState('');
   const [isSwapModalOpen, setIsSwapModalOpen] = useState(false);
-  const [swapTargetId, setSwapTargetId] = useState<PersonaId>('aman');
+  const [swapTargetId, setSwapTargetId] = useState<PersonaId>(() => Object.keys(personas)[0] || '');
   const [swapSuccessToast, setSwapSuccessToast] = useState(false);
   const [completedToast, setCompletedToast] = useState<string | null>(null);
 
@@ -108,7 +108,7 @@ export function ChoresWheel() {
     // 3. User feedback
     const completedPersona = personas[currentPersonaId];
     setCompletedToast(
-      `Awesome job, ${completedPersona?.name.split(' ')[0]}! Duty marked done and passed to the next roommate!`
+      `Awesome job, ${(completedPersona?.name || 'Roommate').split(' ')[0]}! Duty marked done and passed to the next roommate!`
     );
     setTimeout(() => setCompletedToast(null), 3500);
   };
@@ -121,7 +121,7 @@ export function ChoresWheel() {
     setTimeout(() => setSwapSuccessToast(false), 3000);
   };
 
-  const allRoommates: PersonaId[] = ['aman', 'rhea', 'dev', 'tanvi'];
+  const allRoommates: PersonaId[] = Object.keys(personas);
 
   // Count chores where current persona is assigned
   const myPendingChoresCount = chores.filter(
@@ -320,7 +320,7 @@ export function ChoresWheel() {
                                       : 'text-muted-foreground'
                                   )}
                                 >
-                                  {p?.name.split(' ')[0]}
+                                  {(p?.name || pid).split(' ')[0]}
                                 </span>
                               </div>
 
@@ -501,8 +501,8 @@ export function ChoresWheel() {
                     )}
                   >
                     <div className="flex items-center gap-2.5">
-                      <Avatar name={p.name} src={p.avatar} size="xs" />
-                      <span>{p.name}</span>
+                      <Avatar name={p?.name || pid} src={p?.avatar} size="xs" />
+                      <span>{p?.name || pid}</span>
                     </div>
                     {isCurrentlyAssigned && (
                       <Badge variant="outline" size="sm" className="text-[9px]">

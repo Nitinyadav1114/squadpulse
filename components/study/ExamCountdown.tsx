@@ -81,7 +81,22 @@ export function ExamCountdown() {
     return () => clearInterval(timer);
   }, []);
 
-  const activePersona = personas[currentPersonaId] || personas.aman;
+  const activePersona =
+    personas[currentPersonaId] ||
+    Object.values(personas)[0] || {
+      id: 'me',
+      name: 'Resident',
+      room: 'Flat 402',
+      role: 'Resident',
+      avatar: '',
+      tagline: '',
+      bio: '',
+      skills: [],
+      upiId: '',
+      phone: '',
+      accentColor: 'indigo' as const,
+      stats: { studyStreak: 0, choresCompleted: 0, debtBalance: 0 },
+    };
 
   // Handler to toggle topic completion
   const handleToggle = (examId: string, topicId: string, currentCompleted: boolean) => {
@@ -118,12 +133,7 @@ export function ExamCountdown() {
     const newTopic: ExamTopic = {
       id: `top-${Date.now()}`,
       title: newTopicTitle.trim(),
-      completedBy: {
-        aman: false,
-        rhea: false,
-        dev: false,
-        tanvi: false,
-      },
+      completedBy: {},
     };
 
     useSquadStore.setState((state) => ({
@@ -150,12 +160,7 @@ export function ExamCountdown() {
       .map((t, idx) => ({
         id: `top-${Date.now()}-${idx}`,
         title: t,
-        completedBy: {
-          aman: false,
-          rhea: false,
-          dev: false,
-          tanvi: false,
-        },
+        completedBy: {},
       }));
 
     const newExam: ExamItem = {
@@ -168,12 +173,12 @@ export function ExamCountdown() {
         {
           id: `top-${Date.now()}-1`,
           title: 'Module 1: Core Fundamentals & Theory',
-          completedBy: { aman: false, rhea: false, dev: false, tanvi: false },
+          completedBy: {},
         },
         {
           id: `top-${Date.now()}-2`,
           title: 'Module 2: Advanced Topics & Practice Problems',
-          completedBy: { aman: false, rhea: false, dev: false, tanvi: false },
+          completedBy: {},
         },
       ],
     };
@@ -228,17 +233,13 @@ export function ExamCountdown() {
 
           // Calculate Roommate Revision Progress
           const totalTopics = exam.topics.length;
-          const memberProgress: Record<PersonaId, { completed: number; percentage: number }> = {
-            aman: { completed: 0, percentage: 0 },
-            rhea: { completed: 0, percentage: 0 },
-            dev: { completed: 0, percentage: 0 },
-            tanvi: { completed: 0, percentage: 0 },
-          };
+          const memberIds = Object.keys(personas);
+          const memberProgress: Record<string, { completed: number; percentage: number }> = {};
 
           let totalCompletedAcrossAll = 0;
-          const totalSlotsAcrossAll = totalTopics * 4;
+          const totalSlotsAcrossAll = totalTopics * Math.max(memberIds.length, 1);
 
-          (['aman', 'rhea', 'dev', 'tanvi'] as PersonaId[]).forEach((pId) => {
+          memberIds.forEach((pId) => {
             const count = exam.topics.filter((t) => t.completedBy[pId]).length;
             const pct = totalTopics > 0 ? Math.round((count / totalTopics) * 100) : 0;
             memberProgress[pId] = { completed: count, percentage: pct };
@@ -380,9 +381,10 @@ export function ExamCountdown() {
 
                   {/* Roommate Individual Breakdown Bars */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-                    {(['aman', 'rhea', 'dev', 'tanvi'] as PersonaId[]).map((pId) => {
+                    {memberIds.map((pId) => {
                       const p = personas[pId];
-                      const prog = memberProgress[pId];
+                      if (!p) return null;
+                      const prog = memberProgress[pId] || { completed: 0, percentage: 0 };
                       const isMe = pId === currentPersonaId;
 
                       return (
@@ -514,11 +516,12 @@ export function ExamCountdown() {
                               {/* Right: Roommate Avatars who completed this */}
                               <div className="flex items-center gap-2 mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/50 shrink-0 self-end sm:self-auto">
                                 <span className="text-[11px] text-muted-foreground mr-1">
-                                  {completedCount}/4 ready:
+                                  {completedCount}/{Math.max(memberIds.length, 1)} ready:
                                 </span>
                                 <div className="flex items-center -space-x-1.5">
-                                  {(['aman', 'rhea', 'dev', 'tanvi'] as PersonaId[]).map((pId) => {
+                                  {memberIds.map((pId) => {
                                     const p = personas[pId];
+                                    if (!p) return null;
                                     const done = topic.completedBy[pId];
                                     return (
                                       <div

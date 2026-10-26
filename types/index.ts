@@ -2,7 +2,7 @@
 // SQUADPULSE / ROOMIES CENTRAL DATA TYPES & DOMAIN CONTRACTS
 // ============================================================================
 
-export type PersonaId = 'aman' | 'rhea' | 'dev' | 'tanvi';
+export type PersonaId = string;
 
 export interface PersonaStats {
   studyStreak: number;
@@ -34,7 +34,7 @@ export interface AuthUser {
   name: string;
   email: string;
   image?: string;
-  provider: 'google' | 'demo' | 'guest';
+  provider: 'google';
 }
 
 export type ActiveSection = 'hub' | 'daily' | 'study' | 'fun';

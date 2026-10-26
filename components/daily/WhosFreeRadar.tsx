@@ -110,14 +110,18 @@ export function WhosFreeRadar() {
     setIsPingModalOpen(true);
   };
 
-  const allPersonaIds: PersonaId[] = ['aman', 'rhea', 'dev', 'tanvi'];
+  const allPersonaIds: PersonaId[] = Object.keys(personas);
 
-  // Radar position coordinates (normalized around 200x200 center)
-  const radarCoords: Record<PersonaId, { top: string; left: string; angle: string }> = {
-    aman: { top: '22%', left: '26%', angle: '-45deg' },
-    rhea: { top: '22%', left: '74%', angle: '45deg' },
-    dev: { top: '74%', left: '26%', angle: '-135deg' },
-    tanvi: { top: '74%', left: '74%', angle: '135deg' },
+  const getRadarCoords = (index: number, total: number) => {
+    const angleRad = (index / Math.max(total, 1)) * 2 * Math.PI - Math.PI / 2;
+    const radius = 32;
+    const left = 50 + radius * Math.cos(angleRad);
+    const top = 50 + radius * Math.sin(angleRad);
+    return {
+      top: `${Math.round(top)}%`,
+      left: `${Math.round(left)}%`,
+      angle: `${Math.round((angleRad * 180) / Math.PI)}deg`,
+    };
   };
 
   const getStatusBadgeStyle = (badge: StatusBadge) => {
@@ -223,11 +227,11 @@ export function WhosFreeRadar() {
             </div>
 
             {/* Roommate Radar Blips */}
-            {allPersonaIds.map((id) => {
+            {allPersonaIds.map((id, idx) => {
               const persona = personas[id];
               const st = statuses[id];
               const isFree = st?.badge === 'Free to Chill' || st?.badge === 'Canteen / Mess';
-              const coords = radarCoords[id];
+              const coords = getRadarCoords(idx, allPersonaIds.length);
               const isCurrent = id === currentPersonaId;
 
               return (
@@ -236,7 +240,7 @@ export function WhosFreeRadar() {
                   style={{ top: coords.top, left: coords.left }}
                   className="absolute -translate-x-1/2 -translate-y-1/2 z-20 group cursor-pointer"
                   onClick={() => openPingModalTo(id)}
-                  title={`Ping ${persona.name}`}
+                  title={`Ping ${persona?.name || id}`}
                 >
                   <div className="relative flex flex-col items-center">
                     {/* Pulsing ring for free members */}
@@ -244,8 +248,8 @@ export function WhosFreeRadar() {
                       <span className="absolute -inset-1 rounded-full bg-emerald-400/40 animate-ping" />
                     )}
                     <Avatar
-                      name={persona.name}
-                      src={persona.avatar}
+                      name={persona?.name || 'Resident'}
+                      src={persona?.avatar}
                       size="sm"
                       className={cn(
                         'ring-2 transition-transform group-hover:scale-110',
@@ -257,7 +261,7 @@ export function WhosFreeRadar() {
                       )}
                     />
                     <span className="mt-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-card/90 border border-border shadow-xs text-foreground whitespace-nowrap">
-                      {persona.name.split(' ')[0]}
+                      {(persona?.name || id).split(' ')[0]}
                     </span>
                   </div>
                 </div>
@@ -311,15 +315,15 @@ export function WhosFreeRadar() {
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2.5">
                         <Avatar
-                          name={persona.name}
-                          src={persona.avatar}
+                          name={persona?.name || 'Resident'}
+                          src={persona?.avatar}
                           size="md"
                           statusDot={expired ? 'away' : st?.badge === 'Free to Chill' ? 'online' : 'away'}
                         />
                         <div>
                           <div className="flex items-center gap-1.5">
                             <span className="font-semibold text-sm text-foreground">
-                              {persona.name}
+                              {persona?.name || 'Resident'}
                             </span>
                             {isCurrent && (
                               <Badge variant="daily" size="sm" className="text-[9px] py-0 px-1.5">
@@ -328,7 +332,7 @@ export function WhosFreeRadar() {
                             )}
                           </div>
                           <span className="text-xs text-muted-foreground block">
-                            {persona.room} • {persona.role}
+                            {persona?.room || 'Flat 402'} • {persona?.role || 'Resident'}
                           </span>
                         </div>
                       </div>
@@ -478,7 +482,7 @@ export function WhosFreeRadar() {
         isOpen={isEditingStatus}
         onClose={() => setIsEditingStatus(false)}
         title="Update Your Flatmate Status"
-        description={`Set what you're up to so ${currentPersona.name.split(' ')[0]}'s roommates know your availability.`}
+        description={`Set what you're up to so ${(currentPersona?.name || 'Resident').split(' ')[0]}'s roommates know your availability.`}
         size="md"
       >
         <form onSubmit={handleUpdateStatus} className="space-y-4">
@@ -596,8 +600,8 @@ export function WhosFreeRadar() {
                       : 'border-border bg-card hover:bg-muted text-muted-foreground'
                   )}
                 >
-                  <Avatar name={personas[id].name} src={personas[id].avatar} size="xs" />
-                  <span className="truncate">{personas[id].name.split(' ')[0]}</span>
+                  <Avatar name={personas[id]?.name || id} src={personas[id]?.avatar} size="xs" />
+                  <span className="truncate">{(personas[id]?.name || id).split(' ')[0]}</span>
                 </button>
               ))}
             </div>

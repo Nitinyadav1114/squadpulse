@@ -162,7 +162,7 @@ export function GroupWallet() {
     addKittyTransaction,
   } = useSquadStore();
 
-  const allRoommates: PersonaId[] = ['aman', 'rhea', 'dev', 'tanvi'];
+  const allRoommates: PersonaId[] = Object.keys(personas);
 
   // Modals state
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
@@ -465,7 +465,7 @@ export function GroupWallet() {
                             isIDebtor ? 'text-rose-500' : 'text-foreground'
                           )}
                         >
-                          {isIDebtor ? 'You' : debtor?.name.split(' ')[0]}
+                          {isIDebtor ? 'You' : (debtor?.name || debt.debtorId).split(' ')[0]}
                         </span>
                         <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/60" />
                         <span
@@ -476,7 +476,7 @@ export function GroupWallet() {
                               : 'text-foreground'
                           )}
                         >
-                          {isICreditor ? 'You' : creditor?.name.split(' ')[0]}
+                          {isICreditor ? 'You' : (creditor?.name || debt.creditorId).split(' ')[0]}
                         </span>
                       </div>
                     </div>
@@ -554,14 +554,14 @@ export function GroupWallet() {
 
                             <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
                               <span className="font-medium text-foreground">
-                                {isPayerMe ? 'You' : payer?.name.split(' ')[0]} paid
+                                {isPayerMe ? 'You' : (payer?.name || exp.paidById).split(' ')[0]} paid
                               </span>
                               <span>•</span>
                               <span>
                                 Split {exp.splitAmongIds?.length || 4} ways (
                                 {exp.splitAmongIds
                                   ?.map((id) =>
-                                    id === currentPersonaId ? 'You' : personas[id]?.name.split(' ')[0]
+                                    id === currentPersonaId ? 'You' : (personas[id]?.name || id).split(' ')[0]
                                   )
                                   .join(', ')}
                                 )
@@ -661,7 +661,7 @@ export function GroupWallet() {
                                 {tx.description}
                               </span>
                               <span className="text-[10px] text-muted-foreground">
-                                {person?.name.split(' ')[0]}
+                                {(person?.name || tx.personaId).split(' ')[0]}
                               </span>
                             </div>
                           </div>
@@ -794,8 +794,8 @@ export function GroupWallet() {
                         : 'border-border bg-card hover:bg-muted text-muted-foreground'
                     )}
                   >
-                    <Avatar name={p.name} src={p.avatar} size="xs" />
-                    <span className="truncate">{p.name.split(' ')[0]}</span>
+                    <Avatar name={p?.name || p.id} src={p?.avatar} size="xs" />
+                    <span className="truncate">{(p?.name || p.id).split(' ')[0]}</span>
                   </button>
                 );
               })}

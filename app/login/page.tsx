@@ -1,18 +1,20 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { useSquadStore } from '@/lib/store';
 import { PersonaId } from '@/types';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { GithubIcon } from '@/components/ui/GithubIcon';
-import { Sparkles, ArrowRight, ShieldCheck, Zap, CheckCircle2 } from 'lucide-react';
+import { Sparkles, ArrowRight, ShieldCheck, Zap, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
-export default function LoginPage() {
+function LoginFormContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const authError = searchParams.get('error');
   const { personas, setActivePersona, setAuthUser } = useSquadStore();
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
   const [customName, setCustomName] = useState('');
@@ -108,6 +110,25 @@ export default function LoginPage() {
             Sign in with Google or select a persona for zero-config 1-click access.
           </p>
         </div>
+
+        {/* Auth Error / Setup Notice Banner */}
+        {authError && (
+          <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-start gap-2.5 animate-in fade-in duration-200">
+            <AlertCircle className="w-4 h-4 shrink-0 text-amber-400 mt-0.5" />
+            <div className="space-y-1">
+              <p className="font-semibold text-amber-200">
+                {authError === 'Configuration'
+                  ? 'Google OAuth Credentials Notice'
+                  : `Authentication Notice (${authError})`}
+              </p>
+              <p className="text-muted-foreground text-[11px] leading-relaxed">
+                {authError === 'Configuration'
+                  ? 'Google OAuth credentials (GOOGLE_CLIENT_ID & GOOGLE_CLIENT_SECRET) need to be configured in your environment or Vercel dashboard. In the meantime, you can explore the app immediately with 1-click using any roommate persona below!'
+                  : 'Could not complete third-party OAuth exchange. You can jump straight in using the 1-click roommate personas below.'}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Google OAuth Button */}
         <div className="space-y-2">
@@ -217,5 +238,22 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-[80vh] flex items-center justify-center">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Sparkles className="w-4 h-4 animate-spin text-primary" />
+            <span>Loading authentication...</span>
+          </div>
+        </div>
+      }
+    >
+      <LoginFormContent />
+    </Suspense>
   );
 }

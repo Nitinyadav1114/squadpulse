@@ -20,6 +20,7 @@ import './tier1-features/fun-group-polls.test.mjs';
 import './tier1-features/fun-watch-play.test.mjs';
 import './tier1-features/fun-habit-tracker.test.mjs';
 import './tier1-features/fun-meme-vault.test.mjs';
+import './tier1-features/auth-session-store.test.mjs';
 
 // Tier 2: Boundary & Corner Cases
 import './tier2-boundary/boundary-wallet-debts.test.mjs';

@@ -441,8 +441,9 @@ async function runPersistenceAndHydrationStress() {
   const parsed = JSON.parse(rawSaved);
   assert(parsed.state !== undefined, 'Serialized payload must contain state wrapper');
 
-  // Verify all 17 partialize fields exist in serialized representation
+  // Verify all 18 partialize fields exist in serialized representation
   const expectedKeys = [
+    'authUser',
     'currentPersonaId',
     'theme',
     'statuses',
@@ -465,7 +466,7 @@ async function runPersistenceAndHydrationStress() {
   for (const key of expectedKeys) {
     assert(parsed.state[key] !== undefined, `Serialized state missing whitelisted key: ${key}`);
   }
-  console.log(`  ${colors.green}✔ Serialized schema matches all 17 partialize fields (${rawSaved.length} bytes)${colors.reset}`);
+  console.log(`  ${colors.green}✔ Serialized schema matches all 18 partialize fields (${rawSaved.length} bytes)${colors.reset}`);
 
   // 2. Snapshot current state in memory
   const stateSnapshotBeforeReset = JSON.parse(JSON.stringify(store.getState()));
@@ -491,7 +492,7 @@ async function runPersistenceAndHydrationStress() {
       `Hydration fidelity check failed for key: ${key}`
     );
   }
-  console.log(`  ${colors.green}✔ Perfect 100% hydration fidelity verified across all 17 subsystems${colors.reset}`);
+  console.log(`  ${colors.green}✔ Perfect 100% hydration fidelity verified across all 18 subsystems${colors.reset}`);
 
   // 5. Corruption Fault-Tolerance: Invalid JSON in localStorage
   console.log(`  ${colors.dim}• Stress-testing corrupted JSON string fault tolerance...${colors.reset}`);

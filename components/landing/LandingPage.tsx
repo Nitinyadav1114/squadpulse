@@ -43,8 +43,19 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
   const [isSignInModalOpen, setIsSignInModalOpen] = useState(false);
   const [activeWingTab, setActiveWingTab] = useState<'daily' | 'study' | 'fun'>('daily');
   const [isDemoLoading, setIsDemoLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const activePersona = personas[currentPersonaId] || personas.aman;
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setIsGoogleLoading(true);
+      await signIn('google', { callbackUrl: '/' });
+    } catch (err) {
+      console.error('Google sign in error:', err);
+      setIsGoogleLoading(false);
+    }
+  };
 
   const handle1ClickDemo = async () => {
     try {
@@ -164,7 +175,7 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
                 type="button"
                 onClick={handle1ClickDemo}
                 disabled={isDemoLoading}
-                className="hidden xs:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/60 hover:bg-muted border border-border text-xs font-medium text-foreground transition-all cursor-pointer"
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/60 hover:bg-muted border border-border text-xs font-medium text-foreground transition-all cursor-pointer"
               >
                 <Zap className="w-3.5 h-3.5 text-amber-400" />
                 <span>1-Click Demo</span>
@@ -233,8 +244,9 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
             {/* Google OAuth Button */}
             <button
               type="button"
-              onClick={() => signIn('google', { callbackUrl: '/' })}
-              className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-card hover:bg-muted/90 text-foreground border border-border/80 font-semibold text-sm shadow-md hover:shadow-lg transition-all cursor-pointer hover:scale-[1.01]"
+              onClick={handleGoogleSignIn}
+              disabled={isGoogleLoading || isDemoLoading}
+              className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-card hover:bg-muted/90 text-foreground border border-border/80 font-semibold text-sm shadow-md hover:shadow-lg transition-all cursor-pointer hover:scale-[1.01] disabled:opacity-50"
             >
               <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                 <path
@@ -254,7 +266,7 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                 />
               </svg>
-              <span>Sign in with Google</span>
+              <span>{isGoogleLoading ? 'Connecting to Google...' : 'Sign in with Google'}</span>
             </button>
 
             {/* Instant 1-Click Demo */}
@@ -414,7 +426,7 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
       {/* ==================================================================== */}
       {/* 3 Core Wings Interactive Section */}
       {/* ==================================================================== */}
-      <section id="wings" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-border/60">
+      <section id="wings" className="scroll-mt-16 py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-border/60">
         <div className="text-center max-w-3xl mx-auto mb-12">
           <h2 className="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-2">
             Architected for Every Campus Dimension
@@ -465,6 +477,7 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
         </div>
 
         {/* Dynamic Tab Contents */}
+        <div id="features" className="scroll-mt-24">
         {activeWingTab === 'daily' && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in duration-300">
             {/* Card 1: Status Radar */}
@@ -665,6 +678,7 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
             </div>
           </div>
         )}
+        </div>
       </section>
 
       {/* ==================================================================== */}
@@ -788,10 +802,11 @@ export function LandingPage({ onEnterApp }: { onEnterApp?: () => void }) {
           <div className="flex flex-wrap items-center justify-center gap-3">
             <button
               type="button"
-              onClick={() => signIn('google', { callbackUrl: '/' })}
-              className="flex items-center gap-2.5 px-6 py-3.5 rounded-2xl bg-foreground text-background font-bold text-sm hover:opacity-95 transition-all cursor-pointer shadow-lg"
+              onClick={handleGoogleSignIn}
+              disabled={isGoogleLoading || isDemoLoading}
+              className="flex items-center gap-2.5 px-6 py-3.5 rounded-2xl bg-foreground text-background font-bold text-sm hover:opacity-95 transition-all cursor-pointer shadow-lg disabled:opacity-50"
             >
-              <span>Sign in with Google</span>
+              <span>{isGoogleLoading ? 'Connecting to Google...' : 'Sign in with Google'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
             <button

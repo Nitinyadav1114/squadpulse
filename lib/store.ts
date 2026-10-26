@@ -752,6 +752,7 @@ export const useSquadStore = create<SquadPulseState>()(
         removeItem: () => {},
       })),
       partialize: (state) => ({
+        authUser: state.authUser,
         currentPersonaId: state.currentPersonaId,
         theme: state.theme,
         statuses: state.statuses,

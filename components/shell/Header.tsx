@@ -164,12 +164,14 @@ export function Header() {
                   )}
                 </div>
 
-                <div className="hidden sm:flex flex-col text-left max-w-[120px]">
+                <div className="hidden sm:flex flex-col text-left max-w-[130px]">
                   <span className="text-xs font-semibold leading-tight text-foreground truncate">
                     {authUser.name}
                   </span>
                   <span className="text-[10px] text-muted-foreground leading-tight truncate">
-                    {activePersona.name} ({activePersona.role.split('•')[0].trim()})
+                    {authUser.name === activePersona.name
+                      ? `${activePersona.role.split('•')[0].trim()} • Flat 402`
+                      : `as ${activePersona.name} (${activePersona.role.split('•')[0].trim()})`}
                   </span>
                 </div>
                 <ChevronDown className="w-3.5 h-3.5 text-muted-foreground hidden sm:block" />
